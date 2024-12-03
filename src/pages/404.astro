@@ -1,0 +1,55 @@
+---
+import BaseHead from '../components/BaseHead.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import { SITE_TITLE, SITE_DESCRIPTION } from '../consts';
+---
+
+<!doctype html>
+<html lang="zh-cn">
+	<head>
+		<BaseHead title={`404 - ${SITE_TITLE}`} description={SITE_DESCRIPTION} />
+		<style>
+			body {
+				display: flex;
+				flex-direction: column;
+				height: 100vh;
+				text-align: center;
+			}
+			h1 {
+				font-size: 3em;
+				margin-bottom: 0.5em;
+			}
+			p {
+				font-size: 1.5em;
+				margin-bottom: 1em;
+			}
+			a {
+				color: #007BFF;
+				text-decoration: none;
+				font-weight: bold;
+			}
+			a:hover {
+				text-decoration: underline;
+			}
+		</style>
+	</head>
+	<body>
+		<Header />
+		<main>
+			<h1>404</h1>
+			<p>Page Not Found</p>
+			<p>Redirecting to <a href="/">Home</a> in 3 seconds...</p>
+		</main>
+		<Footer />
+        <script>
+            const redirectToHome = () => {
+                setTimeout(() => {
+                    window.location.replace('/')
+                }, 3000);
+            };
+
+            // redirectToHome();
+        </script>
+	</body>
+</html>

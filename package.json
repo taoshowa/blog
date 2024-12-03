@@ -1,0 +1,21 @@
+{
+  "name": "apparent-antimatter",
+  "type": "module",
+  "version": "0.0.1",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro check && astro build",
+    "preview": "astro preview",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "@astrojs/check": "^0.9.4",
+    "@astrojs/mdx": "^3.1.9",
+    "@astrojs/rss": "^4.0.9",
+    "@astrojs/sitemap": "^3.2.1",
+    "astro": "^4.16.16",
+    "autoprefixer": "^10.4.20",
+    "cssnano": "^7.0.6",
+    "typescript": "^5.7.2"
+  }
+}
