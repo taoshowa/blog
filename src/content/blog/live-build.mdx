@@ -25,8 +25,6 @@ docker run -it -p 1935:1935 -p 8000:80 --rm alfg/nginx-rtmp
 
 访问宿主的8000端口显示nginx欢迎页面
 
-![nginx](./assets/nginx.png)
-
 然后利用FFmpeg进行推流操作，ffmpeg是什么请移步：[Python3利用ffmpeg针对视频进行一些操作](https://v3u.cn/a_id_74)
 
 输入命令，注意摄像头和麦必须和电脑的设备吻合，另外推流服务器也要推到刚刚部署好的nginx上面去
@@ -34,8 +32,6 @@ docker run -it -p 1935:1935 -p 8000:80 --rm alfg/nginx-rtmp
 ```bash
 ffmpeg -f dshow -i video="VMware Virtual USB Video Device":audio="Microphone (High Definition Audio Device)" -tune:v zerolatency -f flv "rtmp://192.168.99.100:1935/stream/test"
 ```
-
-![device](./assets/device.png)
 
 推流成功后，我们就要在网站上观看现场直播了，这里前端服务我们使用vue.js来搭建，视频流播放器我们使用video.js
 
