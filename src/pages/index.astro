@@ -66,7 +66,7 @@ const posts = (await getCollection('blog')).sort(
 					<article class="article">
 						<h2>{post.data.title}</h2>
 						<p>{post.data.description}</p>
-						<a href={`/blog/${post.slug}.html`}>Read more</a>
+						<a href={`/blog/${post.slug}/`}>Read more</a>
 					</article>
 				))}
 			</div>
