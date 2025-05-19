@@ -5,26 +5,176 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>第五人格随机玩法</title>
     <style>
+        :root {
+            --primary-color: #4a90e2; /* Blue */
+            --secondary-color: #2c3e50; /* Dark Grey */
+            --background-color: rgba(255, 255, 255, 0.65); /* Slightly more opaque white */
+            --border-radius: 8px;
+            --spacing-sm: 8px;
+            --spacing-md: 16px;
+            --spacing-lg: 24px;
+            --spacing-xl: 32px;
+            --survivor-color: #2ecc71; /* Green */
+            --hunter-color: #e74c3c; /* Red */
+        }
+
         body {
             min-width: 100vw;
             min-height: 100vh;
             margin: 0;
             padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
             background: linear-gradient(
-                rgba(255, 255, 255, 0.7), 
-                rgba(255, 255, 255, 0.7)
+                rgba(255, 255, 255, 0.65), 
+                rgba(255, 255, 255, 0.65)
             ),
-            url('./assets/20240410002754.jpg') top center / cover no-repeat;
+            url('./assets/20240410002754.jpg') top center / cover no-repeat fixed;
+            color: var(--secondary-color);
+            line-height: 1.6;
         }
+
         .container {
-            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: var(--spacing-md);
         }
+
+        h1 {
+            text-align: center;
+            color: var(--secondary-color);
+            margin-bottom: var(--spacing-xl);
+            font-size: 2.8em;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.15);
+            letter-spacing: 1px;
+        }
+
+        h2 {
+            color: var(--secondary-color);
+            margin: var(--spacing-lg) 0 var(--spacing-md);
+            font-size: 1.6em;
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: var(--spacing-sm);
+        }
+
+        .panel {
+            background: var(--background-color);
+            padding: var(--spacing-md);
+            border-radius: var(--border-radius);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            margin-bottom: var(--spacing-md);
+        }
+
+        .flex-group {
+            display: flex;
+            gap: var(--spacing-md);
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: var(--spacing-md);
+        }
+
         .buttons {
             display: flex;
-            * {
-                margin: 4px;
-            }
+            flex-wrap: wrap;
+            gap: var(--spacing-sm);
         }
+
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-size: 1em;
+            transition: all 0.3s ease;
+            outline: none;
+        }
+
+        button:hover:not(:disabled) {
+            background-color: #357abd;
+            transform: translateY(-1px);
+        }
+
+        button:active:not(:disabled) {
+             transform: translateY(0);
+        }
+
+        button:focus-visible {
+            box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.5);
+        }
+
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        input[type="number"] {
+            width: 60px;
+            padding: 6px 8px;
+            border: 1px solid #cccccc;
+            border-radius: var(--border-radius);
+            margin: 0 8px;
+            outline: none;
+        }
+
+        input[type="number"]:focus-visible {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.2);
+        }
+
+        input[type="checkbox"] {
+            margin-right: 4px;
+            transform: scale(1.1);
+        }
+
+        #currentMatch p {
+            margin: var(--spacing-sm) 0;
+            line-height: 1.5;
+        }
+
+        #historyMatch {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        #historyMatch li {
+            background: var(--background-color);
+            padding: var(--spacing-md);
+            margin-bottom: var(--spacing-sm);
+            border-radius: var(--border-radius);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.08);
+            transition: transform 0.2s ease;
+            word-break: break-word;
+        }
+
+        #historyMatch li:hover {
+            transform: translateX(6px);
+        }
+
+        .win-buttons {
+            display: flex;
+            gap: var(--spacing-md);
+            margin: var(--spacing-md) 0 var(--spacing-md) 0;
+        }
+
+        #survivorWin {
+            background-color: var(--survivor-color);
+        }
+
+        #survivorWin:hover:not(:disabled) {
+            background-color: #27ae60;
+        }
+
+        #hunterWin {
+            background-color: var(--hunter-color);
+        }
+
+        #hunterWin:hover:not(:disabled) {
+            background-color: #c0392b;
+        }
+
         /* input number fix */
         input::-webkit-outer-spin-button,
         input::-webkit-inner-spin-button {
@@ -33,33 +183,86 @@
         input[type="number"] {
             -moz-appearance: textfield;
         }
-        #selectedHistory li {
-            padding: 10px;
+
+        @media (max-width: 600px) {
+            .container {
+                padding: var(--spacing-sm);
+            }
+
+            .buttons,
+            .flex-group,
+            .win-buttons {
+                flex-direction: column;
+                gap: var(--spacing-sm);
+            }
+
+            button,
+            .flex-group > div {
+                width: 100%;
+            }
+
+            input[type="number"] {
+                width: calc(100% - 20px); /* Adjust width for full line */
+                margin: 0;
+                display: block;
+                box-sizing: border-box;
+            }
+
+            label[for="hunterMode"],
+            label[for="allMaps"] {
+                 margin-left: var(--spacing-sm);
+            }
+
+            h1 {
+                font-size: 2.2em;
+                margin-bottom: var(--spacing-lg);
+            }
+
+            h2 {
+                font-size: 1.4em;
+                margin-top: var(--spacing-md);
+            }
+
+            .panel {
+                padding: var(--spacing-sm);
+            }
+
+             #historyMatch li {
+                padding: var(--spacing-sm);
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>第五人格随机玩法</h1>
-        <div style="display: flex; gap: 10px;">
-            <div id="normal">
-                对局人数<input style="width: 40px" id="number" type="number" placeholder="5" value="5" min="5" max="10">
+        <div class="panel">
+            <div class="flex-group">
+                <div id="normal">
+                    对局人数<input id="number" type="number" placeholder="5" value="5" min="5" max="10">
+                </div>
+                <div>
+                    <input type="checkbox" name="hunterMode" id="hunterModeButton">
+                    <label for="hunterMode">联合狩猎</label>
+                </div>
             </div>
-            <div>
-                <input type="checkbox" name="hunterMode" id="hunterModeButton">
-                <label for="hunterMode">联合狩猎</label>
+            <div class="flex-group buttons">
+                <div>
+                    <input type="checkbox" name="allMaps" id="allMaps">
+                    <label for="allMaps">包含非比赛地图</label>
+                </div>
+                <button id="randomButton">开始新对局</button>
+                <button id="revokeButton" disabled>取消本次对局</button>
+                <button id="resetButton">重置</button>
             </div>
         </div>
-        <div class="buttons">
-            <input type="checkbox" name="allMaps" id="allMaps">
-            <label for="allMaps">包含非比赛地图</label>
-            <button id="randomButton">随机地图和角色</button>
-            <button id="revokeButton" disabled>取消本次随机</button>
-            <button id="resetButton">重置</button>
+        <h2>当前对局</h2>
+        <div id="currentMatch" class="panel"></div>
+        <div class="win-buttons">
+            <button id="survivorWin" disabled>求生者获胜</button>
+            <button id="hunterWin" disabled>监管者获胜</button>
         </div>
-        <h2>当前对局:</h2>
-        <div id="currentMatch"></div>
-        <h2>历史记录:</h2>
+        <h2>历史记录</h2>
         <ul id="historyMatch"></ul>
     </div>
 
@@ -90,7 +293,8 @@
             hunter: '',
             survivors: [],
             hunterNumbers: [],
-            survivorNumbers: []
+            survivorNumbers: [],
+            winner: ''
         }
         let randomIng = false
         let hunterMode = false
@@ -99,10 +303,14 @@
         const randomButton = document.querySelector('#randomButton')
         const revokeButton = document.querySelector('#revokeButton')
         const resetButton = document.querySelector('#resetButton')
+        const survivorWinButton = document.querySelector('#survivorWin')
+        const hunterWinButton = document.querySelector('#hunterWin')
         hunterModeButton.addEventListener('click', modeChange)
         randomButton.addEventListener('click', randomOnce)
         revokeButton.addEventListener('click', revokeOnce)
         resetButton.addEventListener('click', clearHistory)
+        survivorWinButton.addEventListener('click', () => setWinner('survivor'))
+        hunterWinButton.addEventListener('click', () => setWinner('hunter'))
         
         renderMatch()
 
@@ -166,6 +374,7 @@
                     map: hunterMap,
                     hunter: '自选',
                     survivors: ['自选'],
+                    winner: ''
                 });
                 renderMatch();
                 renderHistory();
@@ -211,6 +420,7 @@
                 map: newSelectedMap,
                 hunter: newSelectedHunter,
                 survivors: newSelectedSurvivors,
+                winner: ''
             });
             renderMatch();
             renderHistory();
@@ -228,6 +438,15 @@
             renderHistory();
         }
 
+        function setWinner(winner) {
+            if (!selectedHistory.length) return;
+            const current = selectedHistory[selectedHistory.length - 1];
+            current.winner = winner;
+            survivorWinButton.disabled = true;
+            hunterWinButton.disabled = true;
+            renderHistory();
+        }
+
         function renderMatch() {
             const current = selectedHistory.slice(-1)[0] || defaultItem;
             const currentMatch = document.getElementById('currentMatch');
@@ -235,6 +454,12 @@
                                 <p>地图: ${current.map}</p>
                                 <p>求生者: ${current.survivors.join(', ')}</p>
                                 <p>监管者: ${current.hunter}</p>`;
+            
+            // Enable/disable win buttons based on whether there's a current match and if it already has a winner
+            const hasCurrentMatch = selectedHistory.length > 0;
+            const currentWinner = hasCurrentMatch ? selectedHistory[selectedHistory.length - 1].winner : '';
+            survivorWinButton.disabled = !hasCurrentMatch || !!currentWinner;
+            hunterWinButton.disabled = !hasCurrentMatch || !!currentWinner;
         }
 
         function renderHistory() {
@@ -244,8 +469,9 @@
 
             for (let i = selectedHistory.length - 1; i >= 0; i--) {
                 const record = selectedHistory[i];
+                const winnerText = record.winner ? ` | 获胜方: ${record.winner === 'survivor' ? '求生者' : '监管者'}` : '';
                 const listItem = document.createElement('li');
-                listItem.textContent = `第${i + 1}局---地图: ${record.map} | 求生者: ${record.survivors.join(', ')} | 监管者: ${record.hunter}`;
+                listItem.textContent = `第${i + 1}局---地图: ${record.map} | 求生者: ${record.survivors.join(', ')} | 监管者: ${record.hunter}${winnerText}`;
                 historyList.appendChild(listItem);
             }
         }
