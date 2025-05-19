@@ -8,7 +8,7 @@
         :root {
             --primary-color: #4a90e2; /* Blue */
             --secondary-color: #2c3e50; /* Dark Grey */
-            --background-color: rgba(255, 255, 255, 0.65); /* Slightly more opaque white */
+            --background-color: rgba(255, 255, 255, 0.85); /* Slightly more opaque white */
             --border-radius: 8px;
             --spacing-sm: 8px;
             --spacing-md: 16px;
@@ -25,8 +25,8 @@
             padding: 0;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
             background: linear-gradient(
-                rgba(255, 255, 255, 0.65), 
-                rgba(255, 255, 255, 0.65)
+                rgba(255, 255, 255, 0.85), 
+                rgba(255, 255, 255, 0.85)
             ),
             url('./assets/20240410002754.jpg') top center / cover no-repeat fixed;
             color: var(--secondary-color);
@@ -231,6 +231,18 @@
                 padding: var(--spacing-sm);
             }
         }
+
+        :global(.winner-badge) {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.9em;
+            color: #fff;
+            margin-left: 8px;
+        }
+        :global(.winner-badge.survivor) { background: #2ecc71; }
+        :global(.winner-badge.hunter) { background: #e74c3c; }
+        :global(.winner-badge.draw) { background: #f1c40f; color: #fff; }
     </style>
 </head>
 <body>
@@ -261,6 +273,7 @@
         <div class="win-buttons">
             <button id="survivorWin" disabled>求生者获胜</button>
             <button id="hunterWin" disabled>监管者获胜</button>
+            <button id="drawWin" disabled>平局</button>
         </div>
         <h2>历史记录</h2>
         <ul id="historyMatch"></ul>
@@ -305,12 +318,14 @@
         const resetButton = document.querySelector('#resetButton')
         const survivorWinButton = document.querySelector('#survivorWin')
         const hunterWinButton = document.querySelector('#hunterWin')
+        const drawWinButton = document.querySelector('#drawWin')
         hunterModeButton.addEventListener('click', modeChange)
         randomButton.addEventListener('click', randomOnce)
         revokeButton.addEventListener('click', revokeOnce)
         resetButton.addEventListener('click', clearHistory)
         survivorWinButton.addEventListener('click', () => setWinner('survivor'))
         hunterWinButton.addEventListener('click', () => setWinner('hunter'))
+        drawWinButton.addEventListener('click', () => setWinner('draw'))
         
         renderMatch()
 
@@ -444,6 +459,7 @@
             current.winner = winner;
             survivorWinButton.disabled = true;
             hunterWinButton.disabled = true;
+            drawWinButton.disabled = true;
             renderHistory();
         }
 
@@ -460,6 +476,7 @@
             const currentWinner = hasCurrentMatch ? selectedHistory[selectedHistory.length - 1].winner : '';
             survivorWinButton.disabled = !hasCurrentMatch || !!currentWinner;
             hunterWinButton.disabled = !hasCurrentMatch || !!currentWinner;
+            drawWinButton.disabled = !hasCurrentMatch || !!currentWinner;
         }
 
         function renderHistory() {
@@ -469,9 +486,16 @@
 
             for (let i = selectedHistory.length - 1; i >= 0; i--) {
                 const record = selectedHistory[i];
-                const winnerText = record.winner ? ` | 获胜方: ${record.winner === 'survivor' ? '求生者' : '监管者'}` : '';
+                let winnerText = '';
+                if (record.winner === 'survivor') {
+                    winnerText = ' | 获胜方：<span class="winner-badge survivor">求生者</span>';
+                } else if (record.winner === 'hunter') {
+                    winnerText = ' | 获胜方：<span class="winner-badge hunter">监管者</span>';
+                } else if (record.winner === 'draw') {
+                    winnerText = ' | <span class="winner-badge draw">平局</span>';
+                }
                 const listItem = document.createElement('li');
-                listItem.textContent = `第${i + 1}局---地图: ${record.map} | 求生者: ${record.survivors.join(', ')} | 监管者: ${record.hunter}${winnerText}`;
+                listItem.innerHTML = `第${i + 1}局---地图: ${record.map} | 求生者: ${record.survivors.join(', ')} | 监管者: ${record.hunter}${winnerText}`;
                 historyList.appendChild(listItem);
             }
         }
