@@ -34,7 +34,7 @@
         }
 
         .container {
-            max-width: 800px;
+            max-width: 1080px;
             margin: 0 auto;
             padding: var(--spacing-md);
         }
@@ -263,6 +263,10 @@
                     <input type="checkbox" name="allMaps" id="allMaps">
                     <label for="allMaps">包含非比赛地图</label>
                 </div>
+                <div>
+                    <input type="checkbox" name="multiplePool" id="multiplePool">
+                    <label for="multiplePool">9v3模式</label>
+                </div>
                 <button id="randomButton">开始新对局</button>
                 <button id="revokeButton" disabled>取消本次对局</button>
                 <button id="resetButton">重置</button>
@@ -287,11 +291,11 @@
             '勘探员', '咒术师', '野人', '杂技演员', '大副', '调酒师', '邮差', '守墓人', '囚徒', 
             '昆虫学者', '画家', '击球手', '玩具商', '病患', '心理学家', '小女孩', '哭泣小丑', '教授', 
             '古董商', '作曲家', '记者', '飞行家', '拉拉队员', '木偶师', '火灾调查员', '法罗女士', '骑士', 
-            '气象学家', '弓箭手']
+            '气象学家', '弓箭手', '幻灯师']
         const hunters = ['厂长', '小丑', '鹿头', '杰克', '蜘蛛', '红蝶', '黄衣之主', '宿伞之魂', '摄影师', 
         '疯眼', '梦之女巫', '爱哭鬼', '孽蜥', '红夫人', '26号守卫', '使徒', '小提琴家', '雕刻家', 
         '博士', '破轮', '渔女', '蜡像师', '噩梦', '记录员', '隐士', '守夜人', '歌剧演员', 
-        '时空之影', '跛脚羊', '喧嚣', '杂货商']
+        '时空之影', '跛脚羊', '喧嚣', '杂货商', '台球手']
         const maps = ['军工厂', '红教堂', '圣心医院', '湖景村', '月亮河公园', '里奥的回忆', '永眠镇', '唐人街', '不归林']
         const elseMaps = ['白沙街疯人院', '闪金石窟', '克雷伯格赛马场']
         const allMaps = maps.concat(elseMaps)
@@ -303,7 +307,7 @@
         const selectedHistory = []; // 存储历史记录
         const defaultItem = {
             map: '',
-            hunter: '',
+            hunters: [],
             survivors: [],
             hunterNumbers: [],
             survivorNumbers: [],
@@ -311,6 +315,7 @@
         }
         let randomIng = false
         let hunterMode = false
+        let isMultiplePool = false
 
         const hunterModeButton = document.querySelector('#hunterModeButton')
         const randomButton = document.querySelector('#randomButton')
@@ -335,6 +340,12 @@
             hunterMode = allMapSelect.disabled = numberInput.disabled = hunterModeButton.checked
             clearHistory()
         }
+
+        const multiplePoolButton = document.querySelector('#multiplePool');
+        multiplePoolButton.addEventListener('click', () => {
+            isMultiplePool = multiplePoolButton.checked;
+            clearHistory();
+        });
 
         function randomNumber(number) {
             return Math.floor(Math.random() * number)
@@ -376,7 +387,7 @@
             number = hunterMode ? 10 : Math.max(number, 5);
             const seatNumbers = Array(number).fill().map((_, i) => i)
             const chooseNumbers = getRandomElements(seatNumbers, 5)
-            let hunterNumbers, survivorNumbers, hunterMap = ''
+            let hunterNumbers = [], survivorNumbers = [], hunterMap = '';
             // 狩猎模式，随机两位监管，其余求生
             if (hunterMode) {
                 const hunterMapIndex = randomNumber(hunterMaps.length)
@@ -387,7 +398,7 @@
                     hunterNumbers,
                     survivorNumbers: [],
                     map: hunterMap,
-                    hunter: '自选',
+                    hunters: ['自选'],
                     survivors: ['自选'],
                     winner: ''
                 });
@@ -395,45 +406,51 @@
                 renderHistory();
                 return
             }
-            // 五人模式，首位监管，其余求生
-            let [hNumber, ...sNumbers] = chooseNumbers
-            hunterNumbers = [hNumber]
-            survivorNumbers = sNumbers
-            // 随机地图
-            const allMapSelect = document.getElementById('allMaps')
-            const mapList = allMapSelect.checked ? allMaps : maps
-            if (selectedHistory.length === mapList.length) {
-                alert('剩余地图不足，请重置后再试')
-                return
+            let newSelectedSurvivors, newSelectedHunters, newSelectedMap
+            if (isMultiplePool) {
+                // 随机多位求生者、监管者
+                newSelectedSurvivors = getRandomElements(survivors, 9);
+                newSelectedHunters = getRandomElements(hunters, 3);
+                newSelectedMap = maps[randomNumber(maps.length)];
+            } else {
+                // 五人模式，首位监管，其余求生
+                let [hNumber, ...sNumbers] = chooseNumbers
+                hunterNumbers = [hNumber]
+                survivorNumbers = sNumbers
+                // 随机地图
+                const allMapSelect = document.getElementById('allMaps')
+                const mapList = allMapSelect.checked ? allMaps : maps
+                if (selectedHistory.length === mapList.length) {
+                    alert('剩余地图不足，请重置后再试')
+                    return
+                }
+                const selectedMaps = selectedHistory.map(h => h.map)
+                const mapOptions = mapList.filter(map => !selectedMaps.includes(map))
+                newSelectedMap = mapOptions[randomNumber(mapOptions.length)]
+                // 随机选择4个求生者
+                const selectedSurvivors = selectedHistory.flatMap(h => h.survivorNumbers)
+                const leftSurvivors = survivors.filter(name => !selectedSurvivors.includes(name))
+                if (leftSurvivors.length < 4) {
+                    alert('剩余可选求生者不足，请重置后再试')
+                    return
+                }
+                newSelectedSurvivors = getRandomElements(leftSurvivors, 4)
+                // 随机选择1个监管者
+                const selectedHunters = selectedHistory.flatMap(h => h.hunterNumbers)
+                const leftHunters = hunters.filter(name => !selectedHunters.includes(name))
+                if (leftHunters.length < 1) {
+                    alert('剩余可选监管者不足，请重置后再试')
+                    return
+                }
+                newSelectedHunters = getRandomElements(leftHunters, 1)
             }
-            const selectedMaps = selectedHistory.map(h => h.map)
-            const mapOptions = mapList.filter(map => !selectedMaps.includes(map))
-            const mapIndex = randomNumber(mapOptions.length)
-            const newSelectedMap = mapOptions[mapIndex]
-            // 随机选择4个求生者
-            const selectedSurvivors = selectedHistory.flatMap(h => h.survivorNumbers)
-            const leftSurvivors = survivors.filter(name => !selectedSurvivors.includes(name))
-            if (leftSurvivors.length < 4) {
-                alert('剩余可选求生者不足，请重置后再试')
-                return
-            }
-            const newSelectedSurvivors = getRandomElements(leftSurvivors, 4)
-            // 随机选择1个监管者
-            const selectedHunters = selectedHistory.flatMap(h => h.hunterNumbers)
-            const leftHunters = hunters.filter(name => !selectedHunters.includes(name))
-            if (leftHunters.length < 1) {
-                alert('剩余可选监管者不足，请重置后再试')
-                return
-            }
-            const hunterIndex = randomNumber(leftHunters.length);
-            const newSelectedHunter = leftHunters[hunterIndex];
 
             // 记录这次抽取结果
             selectedHistory.push({
                 hunterNumbers,
                 survivorNumbers,
                 map: newSelectedMap,
-                hunter: newSelectedHunter,
+                hunters: newSelectedHunters,
                 survivors: newSelectedSurvivors,
                 winner: ''
             });
@@ -469,7 +486,7 @@
             currentMatch.innerHTML = `<p>${hunterMode ? '' : `求生麦序：${current.survivorNumbers.join(' ')}`} ${`监管麦序：${current.hunterNumbers.join(' ')}`}</p>
                                 <p>地图: ${current.map}</p>
                                 <p>求生者: ${current.survivors.join(', ')}</p>
-                                <p>监管者: ${current.hunter}</p>`;
+                                <p>监管者: ${current.hunters.join(', ')}</p>`;
             
             // Enable/disable win buttons based on whether there's a current match and if it already has a winner
             const hasCurrentMatch = selectedHistory.length > 0;
@@ -495,7 +512,7 @@
                     winnerText = ' | <span class="winner-badge draw">平局</span>';
                 }
                 const listItem = document.createElement('li');
-                listItem.innerHTML = `第${i + 1}局---地图: ${record.map} | 求生者: ${record.survivors.join(', ')} | 监管者: ${record.hunter}${winnerText}`;
+                listItem.innerHTML = `第${i + 1}局---地图: ${record.map} | 求生者: ${record.survivors.join(', ')} | 监管者: ${record.hunters.join(', ')}${winnerText}`;
                 historyList.appendChild(listItem);
             }
         }
